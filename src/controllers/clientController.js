@@ -38,12 +38,10 @@ export const createClientController = async (req, res) => {
   const { name, email, job, rate, isActive } = req.body;
 
   if (!name || !email || !job || !rate || typeof isActive !== "boolean") {
-    return res
-      .status(400)
-      .json({
-        error: "All fields are required",
-        content: `${name}, ${email}, ${job}, ${rate}, ${isActive}`,
-      });
+    return res.status(400).json({
+      error: "All fields are required",
+      content: `${name}, ${email}, ${job}, ${rate}, ${isActive}`,
+    });
   }
 
   try {
@@ -63,24 +61,28 @@ export const createClientController = async (req, res) => {
 
 export const updateClientController = async (req, res) => {
   const clientId = parseInt(req.params.id, 10);
-  const { name, email, job, rate, isActive } = req.body;
+  const allowedFields = ["name", "email", "job", "rate", "isActive"];
+  const updateData = {};
 
   if (isNaN(clientId)) {
     return res.status(400).json({ error: "Invalid client ID" });
   }
 
-  if (!name || !email || !job || !rate || typeof isActive !== "boolean") {
-    return res.status(400).json({ error: "All fields are required" });
+  // Only include fields that are present in the request body and allowed
+  for (const field of allowedFields) {
+    if (req.body.hasOwnProperty(field)) {
+      updateData[field] = req.body[field];
+    }
+  }
+
+  if (Object.keys(updateData).length === 0) {
+    return res
+      .status(400)
+      .json({ error: "No valid fields provided for update" });
   }
 
   try {
-    const updatedClient = await updateClientService(clientId, {
-      name,
-      email,
-      job,
-      rate,
-      isActive,
-    });
+    const updatedClient = await updateClientService(clientId, updateData);
     if (updatedClient.rows.length === 0) {
       return res.status(404).json({ error: "Client not found" });
     }
