@@ -15,3 +15,17 @@ export function createClientService(clientData) {
     [name, email, job, rate, isActive]
   );
 }
+
+export function updateClientService(clientId, clientData) {
+  const { name, email, job, rate, isActive } = clientData;
+  return db.query(
+    "UPDATE client_tb SET name = $1, email = $2, job = $3, rate = $4, isActive = $5 WHERE id = $6 RETURNING *",
+    [name, email, job, rate, isActive, clientId]
+  );
+}
+
+export function deleteClientService(clientId) {
+  return db.query("DELETE FROM client_tb WHERE id = $1 RETURNING *", [
+    clientId,
+  ]);
+}

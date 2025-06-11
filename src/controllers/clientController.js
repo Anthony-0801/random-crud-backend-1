@@ -1,4 +1,9 @@
-import { getAllClientsService, createClientService  } from "../services/clientService.js";
+import {
+  getAllClientsService,
+  createClientService,
+  updateClientService,
+  deleteClientService,
+} from "../services/clientService.js";
 
 export const getAllClientsController = async (req, res) => {
   try {
@@ -32,10 +37,13 @@ export const getClientByIdController = async (req, res) => {
 export const createClientController = async (req, res) => {
   const { name, email, job, rate, isActive } = req.body;
 
-  if (!name || !email || !job || !rate || typeof isActive !== 'boolean') {
-    return res.status(400).json({ error: "All fields are required", 
-        content: `${name}, ${email}, ${job}, ${rate}, ${isActive}`
-     });
+  if (!name || !email || !job || !rate || typeof isActive !== "boolean") {
+    return res
+      .status(400)
+      .json({
+        error: "All fields are required",
+        content: `${name}, ${email}, ${job}, ${rate}, ${isActive}`,
+      });
   }
 
   try {
@@ -49,6 +57,55 @@ export const createClientController = async (req, res) => {
     res.status(201).json(newClient.rows[0]);
   } catch (error) {
     console.error("Error creating client:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+export const updateClientController = async (req, res) => {
+  const clientId = parseInt(req.params.id, 10);
+  const { name, email, job, rate, isActive } = req.body;
+
+  if (isNaN(clientId)) {
+    return res.status(400).json({ error: "Invalid client ID" });
+  }
+
+  if (!name || !email || !job || !rate || typeof isActive !== "boolean") {
+    return res.status(400).json({ error: "All fields are required" });
+  }
+
+  try {
+    const updatedClient = await updateClientService(clientId, {
+      name,
+      email,
+      job,
+      rate,
+      isActive,
+    });
+    if (updatedClient.rows.length === 0) {
+      return res.status(404).json({ error: "Client not found" });
+    }
+    res.status(200).json(updatedClient.rows[0]);
+  } catch (error) {
+    console.error("Error updating client:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+export const deleteClientController = async (req, res) => {
+  const clientId = parseInt(req.params.id, 10);
+
+  if (isNaN(clientId)) {
+    return res.status(400).json({ error: "Invalid client ID" });
+  }
+
+  try {
+    const deletedClient = await deleteClientService(clientId);
+    if (deletedClient.rows.length === 0) {
+      return res.status(404).json({ error: "Client not found" });
+    }
+    res.status(200).json({ message: "Client deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting client:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
