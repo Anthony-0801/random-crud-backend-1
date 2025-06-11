@@ -1,4 +1,4 @@
-import { getAllClientsService } from "../services/clientService.js";
+import { getAllClientsService, createClientService  } from "../services/clientService.js";
 
 export const getAllClientsController = async (req, res) => {
   try {
@@ -32,8 +32,10 @@ export const getClientByIdController = async (req, res) => {
 export const createClientController = async (req, res) => {
   const { name, email, job, rate, isActive } = req.body;
 
-  if (!name || !email || !job || !rate || isActive === undefined) {
-    return res.status(400).json({ error: "All fields are required" });
+  if (!name || !email || !job || !rate || typeof isActive !== 'boolean') {
+    return res.status(400).json({ error: "All fields are required", 
+        content: `${name}, ${email}, ${job}, ${rate}, ${isActive}`
+     });
   }
 
   try {

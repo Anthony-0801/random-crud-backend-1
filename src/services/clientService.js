@@ -9,7 +9,7 @@ export function getClientByIdService(clientId) {
 }
 
 export function createClientService(clientData) {
-  const { name, email, phone } = clientData;
+  const { name, email, job, rate, isActive } = clientData;
   return db.query(
     "INSERT INTO client_tb (name, email, job, rate, isActive) VALUES ($1, $2, $3, $4, $5) RETURNING *",
     [name, email, job, rate, isActive]
